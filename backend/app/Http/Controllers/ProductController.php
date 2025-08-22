@@ -55,4 +55,35 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
+    public function update(Request $request, $id){
+        try{
+            $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'name' => 'required|unique:products,name,'.$id,
+            ]);
+
+            $product = Product::findOrFail($id);
+            $product->name = $request->name;
+            $product->category_id = $request->category_id;
+            $product->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Product updated successfully',
+            ]);
+        }catch(ValidationException $e){
+            return response()->json([
+                'status' => 422,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        }catch(Exception $e){
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while updating the product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
