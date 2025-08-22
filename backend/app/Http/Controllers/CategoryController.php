@@ -10,11 +10,11 @@ use Illuminate\Validation\ValidationException;
 class CategoryController extends Controller
 {
     public function index(){
-
+        $categories = Category::all();
         return response()->json([
             'status' => 200,
             'message' => 'Category fetched successfully',
-            'data' => []
+            'data' => $categories
         ]);
     }
 
@@ -50,6 +50,7 @@ class CategoryController extends Controller
 
     public function update(Request $request, $id){
         try {
+
             $request->validate([
                 'name' => 'required|unique:categories,name,'.$id
             ]);
@@ -72,6 +73,24 @@ class CategoryController extends Controller
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while updating the category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy($id){
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Category deleted successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while deleting the category',
                 'error' => $e->getMessage()
             ], 500);
         }
