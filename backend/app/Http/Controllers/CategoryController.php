@@ -48,9 +48,26 @@ class CategoryController extends Controller
         }
     }
 
+    public function edit($id){
+        try {
+            $category = Category::findOrFail($id);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Category fetched successfully',
+                'data' => $category
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching the category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function update(Request $request, $id){
         try {
-
+            
             $request->validate([
                 'name' => 'required|unique:categories,name,'.$id
             ]);
