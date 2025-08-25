@@ -28,10 +28,75 @@
             </div>
         </div>
     </nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Products under: </h2>
+
+            <select name="category_id" id="category_id" class="form-control" onchange="fetchProductsByCategory(this.value)" required>
+                <option value="" disabled selected>Select Category</option>
+            </select>
+        </div>
+        
+        <div class="card" id="product-list" style="display: none;">
+            <div class="card-body">
+                <h5 class="card-title">Product List</h5>
+                <div class="card-text">Select a category to view its products.</div>
+            </div>
+        </div>
+
+    </div>
 <script src="asset/bootstrap.bundle.min.js"></script>
 <script src="asset/axios.min.js"></script>
 <script>
-    axios.get('http://127.0.0.1:8000/api/category')
+    
+    function getCategory() {
+        axios.get('http://127.0.0.1:8000/api/category').then(function (response) {
+            const categories = response.data;
+
+            let options = '<option value="" disabled selected>Select Category</option>';
+            categories.data.forEach(category => {
+                options += `<option value="${category.id}">${category.name}</option>`;
+            });
+
+            document.getElementById('category_id').innerHTML = options;
+            document.getElementById('edit-category_id').innerHTML = options;
+        }).catch(function (error) {
+            console.error('Error fetching categories:', error);
+        });
+    }
+
+    function fetchProductsByCategory(categoryId) {
+        axios.get('http://127.0.0.1:8000/api/category/' + categoryId + '/products')
+            .then(function (response) {
+                const category = response.data.data; 
+                const products = category.products; 
+
+                let productListHTML = '';
+                if (products.length > 0) {
+                    productListHTML += '<ul class="list-group">';
+                    products.forEach(product => {
+                        productListHTML += `<li class="list-group-item">${product.name}</li>`;
+                    });
+                    productListHTML += '</ul>';
+                } else {
+                    productListHTML = '<p class="text-muted">No products found for this category.</p>';
+                }
+                
+                document.querySelector('#product-list .card-title').innerHTML = 
+                    `Products under: ${category.name}`;
+                    
+                document.querySelector('#product-list .card-text').innerHTML = productListHTML;
+                
+                document.getElementById('product-list').style.display = 'block';
+            })
+            .catch(function (error) {
+                console.error('Error fetching products:', error);
+            });
+    }
+
+    getCategory();
+
 </script>
 </body>
 </html>
