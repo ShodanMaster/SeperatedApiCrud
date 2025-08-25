@@ -57,6 +57,23 @@ class ProductController extends Controller
         }
     }
 
+    public function edit($id){
+        try {
+            $product = Product::findOrFail($id);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Product fetched successfully',
+                'data' => $product
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching the product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function update(Request $request, $id){
         try{
             $request->validate([

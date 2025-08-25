@@ -60,6 +60,36 @@
         </div>
     </div>
 
+    <!--Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editProductModalLabel">Edit Product</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="" id="editProduct">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Category</label>
+                            <select name="category_id" id="edit-category_id" class="form-select" required>
+                                <option value="" disabled selected>Select Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-name" class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" id="edit-name" placeholder="Enter Product Name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Product List</h2>
@@ -96,6 +126,7 @@
             });
 
             document.getElementById('category_id').innerHTML = options;
+            document.getElementById('edit-category_id').innerHTML = options;
         }).catch(function (error) {
             console.error('Error fetching categories:', error);
         });
@@ -157,6 +188,58 @@
             console.error('Error adding product:', error);
         });
     });
+
+    
+    function editProduct(id) {
+        
+        axios.get('http://127.0.0.1:8000/api/product/'+id+'/edit').then(function (response) {
+            const product = response.data;
+            
+            document.getElementById('edit-category_id').value = product.data.category_id;
+            document.getElementById('edit-name').value = product.data.name;
+
+            const editProductModalEl = document.getElementById('editProductModal');
+            const editProductModal = new bootstrap.Modal(editProductModalEl);
+            editProductModal.show();
+
+            document.getElementById('editProduct').onsubmit = function(e) {
+                e.preventDefault();
+                axios.put('http://127.0.0.1:8000/api/product/' + id, {
+                    category_id: document.getElementById('edit-category_id').value,
+                    name: document.getElementById('edit-name').value
+                }).then(function (response) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Product updated successfully.',
+                        icon: 'success',
+                        timer: 1500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+
+                    editProductModal.hide();
+                    document.getElementById('editProduct').reset();
+                    getProduct();
+                }).catch(function (error) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was an error updating the product.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    console.error('Error updating product:', error);
+                });
+            };
+        }).catch(function (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'There was an error fetching the product for editing.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            console.error('Error fetching product for edit:', error);
+        });
+    }
 
     function deleteProduct(id) {
         Swal.fire({
