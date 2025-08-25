@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="asset/bootstrap.min.css">
+    <script src="asset/sweetalert2.min.js"></script>
     <title>Category|Product-Crud</title>
 </head>
 <body>
@@ -83,7 +84,80 @@
 <script src="asset/bootstrap.bundle.min.js"></script>
 <script src="asset/axios.min.js"></script>
 <script>
-    axios.get('http://127.0.0.1:8000/api/product')
+
+    function getCategory() {
+        axios.get('http://127.0.0.1:8000/api/category').then(function (response) {
+            const categories = response.data;
+
+            let options = '<option value="" disabled selected>Select Category</option>';
+            categories.data.forEach(category => {
+                options += `<option value="${category.id}">${category.name}</option>`;
+            });
+
+            document.getElementById('category_id').innerHTML = options;
+        }).catch(function (error) {
+            console.error('Error fetching categories:', error);
+        });
+    }
+
+    function getProduct() {
+        axios.get('http://127.0.0.1:8000/api/product').then(function (response) {
+            const products = response.data;
+            
+            let tableContent = '';
+            products.data.forEach((product, index) => {
+                tableContent += `<tr>
+                                    <td>${index + 1}</td>
+                                    <td>${product.name}</td>
+                                    <td>
+                                        <button class="btn btn-primary" onclick="editProduct(${product.id})">Edit</button>
+                                        <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                                    </td>
+                                  </tr>`;
+            });
+            document.getElementById('productTableBody').innerHTML = tableContent;
+        }).catch(function (error) {
+            console.error('Error fetching products:', error);
+        });
+    }
+
+    document.getElementById('addProduct').addEventListener('submit', function(e){
+        e.preventDefault();
+        const category_id = document.getElementById('category_id').value;
+        const name = document.getElementById('name').value;
+
+        axios.post('http://127.0.0.1:8000/api/product', {
+            category_id: category_id,
+            name: name
+        }).then(function (response) {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Product added successfully.',
+                icon: 'success',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+
+            const addProductModalEl = document.getElementById('addProductModal');
+            const addProductModal = bootstrap.Modal.getInstance(addProductModalEl);
+            addProductModal.hide();
+            document.getElementById('addProduct').reset();
+            getProduct();
+
+        }).catch(function (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'There was an error adding the product.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            console.error('Error adding product:', error);
+        });
+    });
+
+    getCategory();
+    getProduct();
 </script>
 </body>
 </html>
