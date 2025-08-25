@@ -18,6 +18,7 @@ class ProductController extends Controller
                 'category' => $product->category ? $product->category->name : null,
             ];
         });
+        dd($products->toArray());
         return response()->json([
             'status' => 200,
             'message' => 'Product fetched successfully',
