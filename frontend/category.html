@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Navbar</a>
+            <a class="navbar-brand" href="index.html">Category|Product</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -105,24 +105,38 @@
 <script>
 
     function getCategory() {
-        axios.get('http://127.0.0.1:8000/api/category').then(function (response) {
-            const categories = response.data;
-            
-            let tableContent = '';
-            categories.data.forEach((category, index) => {
-                tableContent += `<tr>
-                                    <td>${index + 1}</td>
-                                    <td>${category.name}</td>
-                                    <td>
-                                        <button class="btn btn-primary" onclick="editCategory(${category.id})">Edit</button>
-                                        <button class="btn btn-danger" onclick="deleteCategory(${category.id})">Delete</button>
-                                    </td>
-                                  </tr>`;
+        axios.get('http://127.0.0.1:8000/api/category')
+            .then(function (response) {
+                const categories = response.data;
+
+                let tableContent = '';
+
+                if (categories.data.length > 0) {
+                    categories.data.forEach((category, index) => {
+                        tableContent += `<tr>
+                                            <td>${index + 1}</td>
+                                            <td>${category.name}</td>
+                                            <td>
+                                                <button class="btn btn-primary" onclick="editCategory(${category.id})">Edit</button>
+                                                <button class="btn btn-danger" onclick="deleteCategory(${category.id})">Delete</button>
+                                            </td>
+                                        </tr>`;
+                    });
+                } else {
+                    tableContent = `<tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            No categories found
+                                        </td>
+                                    </tr>`;
+                }
+
+                document.getElementById('categoryTableBody').innerHTML = tableContent;
+            })
+            .catch(function (error) {
+                console.error('Error fetching categories:', error);
+                document.getElementById('categoryTableBody').innerHTML =
+                    `<tr><td colspan="3" class="text-center text-danger">Error loading categories</td></tr>`;
             });
-            document.getElementById('categoryTableBody').innerHTML = tableContent;
-        }).catch(function (error) {
-            console.error('Error fetching categories:', error);
-        });
     }
 
     getCategory();
@@ -159,7 +173,6 @@
             console.error('Error adding category:', error);
         });
     });
-
 
     function editCategory(id) {
         

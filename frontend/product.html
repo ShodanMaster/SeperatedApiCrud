@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Navbar</a>
+            <a class="navbar-brand" href="index.html">Category|Product</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -133,25 +133,39 @@
     }
 
     function getProduct() {
-        axios.get('http://127.0.0.1:8000/api/product').then(function (response) {
-            const products = response.data;
-            
-            let tableContent = '';
-            products.data.forEach((product, index) => {
-                tableContent += `<tr>
-                                    <td>${index + 1}</td>
-                                    <td>${product.category}</td>
-                                    <td>${product.name}</td>
-                                    <td>
-                                        <button class="btn btn-primary" onclick="editProduct(${product.id})">Edit</button>
-                                        <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
-                                    </td>
-                                  </tr>`;
+        axios.get('http://127.0.0.1:8000/api/product')
+            .then(function (response) {
+                const products = response.data;
+                
+                let tableContent = '';
+
+                if (products.data.length > 0) {
+                    products.data.forEach((product, index) => {
+                        tableContent += `<tr>
+                                            <td>${index + 1}</td>
+                                            <td>${product.category}</td>
+                                            <td>${product.name}</td>
+                                            <td>
+                                                <button class="btn btn-primary" onclick="editProduct(${product.id})">Edit</button>
+                                                <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                                            </td>
+                                        </tr>`;
+                    });
+                } else {
+                    tableContent = `<tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            No products found
+                                        </td>
+                                    </tr>`;
+                }
+
+                document.getElementById('productTableBody').innerHTML = tableContent;
+            })
+            .catch(function (error) {
+                console.error('Error fetching products:', error);
+                document.getElementById('productTableBody').innerHTML =
+                    `<tr><td colspan="4" class="text-center text-danger">Error loading products</td></tr>`;
             });
-            document.getElementById('productTableBody').innerHTML = tableContent;
-        }).catch(function (error) {
-            console.error('Error fetching products:', error);
-        });
     }
 
     document.getElementById('addProduct').addEventListener('submit', function(e){
